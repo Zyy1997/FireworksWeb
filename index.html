@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>烟花展示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .category {
+            margin-bottom: 40px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .category-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ff4d4d;
+            text-align: center;
+        }
+
+        .fireworks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            justify-items: center;
+            justify-content: center;
+        }
+
+        .firework-item {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s;
+            width: 100%;
+            max-width: 280px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .firework-item:hover {
+            transform: scale(1.05);
+        }
+
+        .firework-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            display: block;
+        }
+
+        .firework-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px;
+            text-align: center;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            width: 100%;
+        }
+
+        .firework-name {
+            margin-bottom: 4px;
+        }
+
+        .firework-price {
+            color: #ff4d4d;
+            font-weight: bold;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 800px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+        }
+
+        video {
+            width: 100%;
+        }
+
+        .slideshow-container {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        .slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .prev, .next {
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 16px;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            background: rgba(0, 0, 0, 0.5);
+            user-select: none;
+            z-index: 1;
+        }
+
+        .next {
+            right: 0;
+        }
+
+        .prev:hover, .next:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+
+            .category-title {
+                font-size: 20px;
+                margin-bottom: 15px;
+            }
+
+            .category {
+                max-width: 100%;
+                padding: 0 10px;
+            }
+
+            .fireworks-grid {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 15px;
+            }
+
+            .firework-item {
+                max-width: 200px;
+            }
+
+            .firework-item img {
+                height: 150px;
+            }
+
+            .firework-info {
+                padding: 5px;
+            }
+
+            .firework-name {
+                font-size: 14px;
+            }
+
+            .firework-price {
+                font-size: 13px;
+            }
+
+            .modal-content {
+                width: 95%;
+            }
+
+            .prev, .next {
+                padding: 8px;
+                font-size: 16px;
+            }
+
+            .close-modal {
+                top: 10px;
+                right: 10px;
+                font-size: 24px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .fireworks-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 10px;
+            }
+
+            .firework-item {
+                max-width: 160px;
+            }
+
+            .category {
+                margin-bottom: 25px;
+            }
+
+            .category-title {
+                font-size: 18px;
+                margin-bottom: 12px;
+            }
+
+            .firework-name {
+                font-size: 12px;
+            }
+
+            .firework-price {
+                font-size: 11px;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            .slideshow-container {
+                height: 150px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .slideshow-container {
+                height: 130px;
+            }
+        }
+
+        .category {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .loading::after {
+            content: '';
+            width: 50px;
+            height: 50px;
+            border: 5px solid #333;
+            border-top-color: #ff4d4d;
+            border-radius: 50%;
+            animation: loading 0.8s infinite linear;
+        }
+
+        @keyframes loading {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .play-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .play-icon::before {
+            content: '';
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 10px 0 10px 20px;
+            border-color: transparent transparent transparent #fff;
+            margin-left: 5px;
+        }
+
+        @media screen and (max-width: 768px) {
+            .play-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .play-icon::before {
+                border-width: 8px 0 8px 16px;
+                margin-left: 4px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .play-icon {
+                width: 30px;
+                height: 30px;
+            }
+
+            .play-icon::before {
+                border-width: 6px 0 6px 12px;
+                margin-left: 3px;
+            }
+        }
+
+        .volume-control {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        #volumeSlider {
+            width: 150px;
+            height: 5px;
+            -webkit-appearance: none;
+            background: #555;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        #volumeSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 15px;
+            height: 15px;
+            background: #ff4d4d;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        #volumeSlider::-moz-range-thumb {
+            width: 15px;
+            height: 15px;
+            background: #ff4d4d;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        #volumeValue {
+            color: white;
+            min-width: 45px;
+        }
+
+        @media screen and (max-width: 768px) {
+            .volume-control {
+                padding: 8px;
+            }
+
+            #volumeSlider {
+                width: 120px;
+            }
+        }
+
+        #fireworksCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="fireworksCanvas"></canvas>
+    <div class="loading" id="loading"></div>
+    <h1>烟花展示</h1>
+
+    <div class="category">
+        <h2 class="category-title">礼花弹类</h2>
+        <div class="fireworks-grid">
+            <div class="firework-item" onclick="showVideo('videos/buJingYun.mp4')">
+                <img src="image/步惊云.png" alt="步惊云">
+                <div class="firework-info">
+                    <div class="firework-name">步惊云</div>
+                    <div class="firework-price">¥7/个</div>
+                </div>
+            </div>
+            <div class="firework-item" onclick="showVideo('videos/kongque.mp4')">
+                <img src="image/孔雀开屏.png" alt="孔雀开屏">
+                <div class="firework-info">
+                    <div class="firework-name">孔雀开屏</div>
+                    <div class="firework-price">¥15/个</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="category">
+        <h2 class="category-title">喷花类</h2>
+        <div class="fireworks-grid">
+            <div class="firework-item" onclick="showVideo('videos/penhua.mp4')">
+                <img src="image/精品喷花.png" alt="精品喷花">
+                <div class="firework-info">
+                    <div class="firework-name">小喷花</div>
+                    <div class="firework-price">¥15/个</div>
+                </div>
+            </div>
+            <div class="firework-item" onclick="showVideo('videos/加特林.mp4')">
+                <img src="image/加特林.png" alt="加特林">
+                <div class="play-icon"></div>
+                <div class="firework-info">
+                    <div class="firework-name">加特林（1088发/1888发）</div>
+                    <div class="firework-price">¥220/箱（12个）</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="category">
+        <h2 class="category-title">仙女棒系列</h2>
+        <div class="fireworks-grid">
+            <div class="firework-item" onclick="showVideo('videos/仙女棒.mp4')" data-type="xiannv">
+                <div class="slideshow-container">
+                    <div class="slide active">
+                        <img src="image/仙女棒1.png" alt="金色仙女棒">
+                    </div>
+                    <div class="slide">
+                        <img src="image/仙女棒2.png" alt="彩色仙女棒">
+                    </div>
+                    <div class="slide">
+                        <img src="image/仙女棒3.png" alt="特效仙女棒">
+                    </div>
+                    <a class="prev" onclick="changeSlide(-1, event)">&#10094;</a>
+                    <a class="next" onclick="changeSlide(1, event)">&#10095;</a>
+                    <div class="play-icon"></div>
+                </div>
+                <div class="firework-info">
+                    <div class="firework-name">仙女棒</div>
+                    <div class="firework-price">¥3/个 | ¥25/10个</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="category">
+        <h2 class="category-title">小型烟花</h2>
+        <div class="fireworks-grid">
+            <div class="firework-item" data-type="jinyu">
+                <div class="slideshow-container">
+                    <div class="slide active">
+                        <img src="image/小金鱼1.png" alt="欢乐小金鱼">
+                    </div>
+                    <div class="slide">
+                        <img src="image/小金鱼2.png" alt="跳跳小金鱼">
+                    </div>
+                    <a class="prev" onclick="changeSlide(-1, event)">&#10094;</a>
+                    <a class="next" onclick="changeSlide(1, event)">&#10095;</a>
+                </div>
+                <div class="firework-info">
+                    <div class="firework-name">小金鱼</div>
+                    <div class="firework-price">¥5/包（25个）| ¥60/箱（12包）</div>
+                </div>
+            </div>
+            <div class="firework-item">
+                <img src="image/窜天猴.png" alt="窜天猴">
+                <div class="firework-info">
+                    <div class="firework-name">窜天猴</div>
+                    <div class="firework-price">¥10/把</div>
+                </div>
+            </div>
+            <div class="firework-item" onclick="showVideo('videos/三分烟花.mp4')">
+                <img src="image/三分烟花.png" alt="三分烟花">
+                <div class="play-icon"></div>
+                <div class="firework-info">
+                    <div class="firework-name">三分烟花</div>
+                    <div class="firework-price">¥12/个</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="videoModal">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <div class="modal-content">
+            <video id="videoPlayer" controls>
+                您的浏览器不支持视频播放。
+            </video>
+            <div class="volume-control">
+                <input type="range" id="volumeSlider" min="0" max="100" value="50">
+                <span id="volumeValue">50%</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showVideo(videoSrc) {
+            const modal = document.getElementById('videoModal');
+            const video = document.getElementById('videoPlayer');
+            video.src = videoSrc;
+            video.volume = 0.5;
+            modal.style.display = 'block';
+            video.play();
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('videoModal');
+            const video = document.getElementById('videoPlayer');
+            modal.style.display = 'none';
+            video.pause();
+            video.src = '';
+        }
+
+        // 点击模态框外部关闭
+        document.getElementById('videoModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        let slideIndexes = {
+            xiannv: 0,
+            jinyu: 0
+        };
+        
+        function changeSlide(n, event) {
+            event.stopPropagation(); // 阻止事件冒泡
+            const container = event.target.closest('.slideshow-container');
+            const slides = container.getElementsByClassName("slide");
+            const type = container.closest('.firework-item').getAttribute('data-type');
+            
+            slideIndexes[type] += n;
+            
+            if (slideIndexes[type] >= slides.length) {
+                slideIndexes[type] = 0;
+            }
+            if (slideIndexes[type] < 0) {
+                slideIndexes[type] = slides.length - 1;
+            }
+            
+            for (let i = 0; i < slides.length; i++) {
+                slides[i].classList.remove("active");
+            }
+            slides[slideIndexes[type]].classList.add("active");
+        }
+
+        // 自动轮播
+        document.querySelectorAll('.slideshow-container').forEach(container => {
+            const type = container.closest('.firework-item').getAttribute('data-type');
+            const slides = container.getElementsByClassName("slide");
+            
+            setInterval(() => {
+                slideIndexes[type]++;
+                if (slideIndexes[type] >= slides.length) {
+                    slideIndexes[type] = 0;
+                }
+                for (let i = 0; i < slides.length; i++) {
+                    slides[i].classList.remove("active");
+                }
+                slides[slideIndexes[type]].classList.add("active");
+            }, 3000);
+        });
+
+        window.addEventListener('load', function() {
+            document.getElementById('loading').style.display = 'none';
+            
+            // 添加类别的渐入动画延迟
+            document.querySelectorAll('.category').forEach((category, index) => {
+                category.style.animationDelay = (index * 0.2) + 's';
+            });
+        });
+
+        // 音量控制
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeValue = document.getElementById('volumeValue');
+        const videoPlayer = document.getElementById('videoPlayer');
+
+        volumeSlider.addEventListener('input', function() {
+            const volume = this.value / 100;
+            videoPlayer.volume = volume;
+            volumeValue.textContent = this.value + '%';
+        });
+
+        // 记住用户设置的音量
+        videoPlayer.addEventListener('volumechange', function() {
+            const volume = Math.round(this.volume * 100);
+            volumeSlider.value = volume;
+            volumeValue.textContent = volume + '%';
+        });
+
+        // 烟花动画
+        const canvas = document.getElementById('fireworksCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 设置 canvas 尺寸
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // 烟花粒子类
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.velocity = {
+                    x: (Math.random() - 0.5) * 12,
+                    y: (Math.random() - 0.5) * 12
+                };
+                this.alpha = 1;
+                this.friction = 0.98;
+                this.gravity = 0.15;
+                this.fadeSpeed = 0.015;  // 添加淡出速度控制
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+
+            update() {
+                this.velocity.x *= this.friction;
+                this.velocity.y *= this.friction;
+                this.velocity.y += this.gravity;
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                this.alpha = Math.max(0, this.alpha - this.fadeSpeed);  // 确保 alpha 不会小于0
+                return this.alpha > 0;  // 返回粒子是否还存活
+            }
+        }
+
+        // 烟花类
+        class Firework {
+            constructor(x, y, targetX, targetY, color) {
+                this.x = x;
+                this.y = y;
+                this.targetX = targetX;
+                this.targetY = targetY;
+                this.color = color;
+                this.velocity = {
+                    x: (targetX - x) / 30,
+                    y: (targetY - y) / 30
+                };
+                this.particles = [];
+                this.trail = [];
+                this.trailAlpha = 1;  // 添加轨迹透明度
+            }
+
+            draw() {
+                // 只在上升阶段绘制烟花点
+                if (this.particles.length === 0) {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                }
+
+                // 绘制轨迹
+                if (this.trailAlpha > 0) {
+                    for (let i = 0; i < this.trail.length; i++) {
+                        const point = this.trail[i];
+                        ctx.globalAlpha = (i / this.trail.length) * this.trailAlpha;
+                        ctx.beginPath();
+                        ctx.arc(point.x, point.y, 1, 0, Math.PI * 2);
+                        ctx.fillStyle = this.color;
+                        ctx.fill();
+                    }
+                }
+                ctx.globalAlpha = 1;
+            }
+
+            update() {
+                // 在上升阶段记录轨迹
+                if (this.particles.length === 0) {
+                    this.trail.push({ x: this.x, y: this.y });
+                    if (this.trail.length > 20) this.trail.shift();
+                } else {
+                    // 爆炸后轨迹逐渐消失
+                    this.trailAlpha -= 0.02;
+                }
+
+                if (this.particles.length === 0) {
+                    this.x += this.velocity.x;
+                    this.y += this.velocity.y;
+
+                    if (Math.abs(this.x - this.targetX) < 5 && Math.abs(this.y - this.targetY) < 5) {
+                        // 爆炸效果
+                        for (let i = 0; i < 150; i++) {
+                            this.particles.push(new Particle(this.x, this.y, this.color));
+                        }
+                        return false;
+                    }
+                }
+
+                // 更新所有粒子
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const particle = this.particles[i];
+                    particle.update();
+                    if (particle.alpha <= 0) {
+                        this.particles.splice(i, 1);
+                    }
+                }
+
+                // 当轨迹完全消失且所有粒子消失时，移除烟花
+                return this.particles.length === 0 && this.trailAlpha <= 0;
+            }
+        }
+
+        const fireworks = [];
+        const colors = [
+            '#ff4d4d', '#ffff4d', '#4dff4d', '#4dffff', '#ff4dff',
+            '#ff8c1a', '#ff1a8c', '#1aff8c', '#8c1aff', '#ffffff'
+        ];
+
+        function createFirework() {
+            const startX = Math.random() * canvas.width;
+            const startY = canvas.height;
+            const targetX = Math.random() * canvas.width;
+            const targetY = canvas.height * 0.1 + Math.random() * canvas.height * 0.6;
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            fireworks.push(new Firework(startX, startY, targetX, targetY, color));
+        }
+
+        // 加快烟花发射频率
+        setInterval(createFirework, 800);
+
+        // 初始发射多个烟花
+        for(let i = 0; i < 3; i++) {
+            setTimeout(createFirework, i * 300);
+        }
+
+        // 修改动画循环，减少拖影效果
+        function animate() {
+            // 使用完全不透明的背景色清除画布
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 添加半透明层制造拖影效果
+            ctx.fillStyle = 'rgba(26, 26, 26, 0.3)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = fireworks.length - 1; i >= 0; i--) {
+                const firework = fireworks[i];
+                if (firework.update()) {
+                    fireworks.splice(i, 1);
+                } else {
+                    firework.draw();
+                }
+
+                // 绘制并更新粒子
+                for (let j = firework.particles.length - 1; j >= 0; j--) {
+                    const particle = firework.particles[j];
+                    if (!particle.update()) {  // 如果粒子已死亡
+                        firework.particles.splice(j, 1);
+                    } else {
+                        particle.draw();
+                    }
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
